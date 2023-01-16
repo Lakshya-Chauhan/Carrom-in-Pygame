@@ -8,6 +8,7 @@ frameRate = 200
 collisions = []
 dt = 1/200
 class obj:
+    boardFramesDist = [47, 46]
     stoppedObjs = 0
     screen_size = [800, 800]
     def __init__(self, mass, pos, radius, color = (0, 0, 0), acceleration = 0, velx = 0, vely = 0, e = 1, number = None):
@@ -23,9 +24,9 @@ class obj:
         self.number = number
         self.stop = None
     
-    def display(self):
+    def display(self, SURFACE):
         try:
-            pygame.draw.circle(screen, self.color, (round(self.pos[0]),round(self.pos[1])), self.radius)
+            pygame.draw.circle(SURFACE, self.color, (round(self.pos[0]),round(self.pos[1])), self.radius)
         except:
             print(self.color)
     
@@ -40,34 +41,34 @@ class obj:
             self.vel -= self.friction(9.8, 0.3)*dt
             self.x = self.vel[0]
             self.y = self.vel[1]
-            if self.vel.magnitude() < 0.01:
+            if self.vel.magnitude() < 0.1:
                 obj.stoppedObjs += 1
-            if self.pos[0] > obj.screen_size[0]-self.radius:
-                self.pos[0] -= 2*(self.pos[0]-self.screen_size[0]+self.radius)
+            if self.pos[0] >  obj.screen_size[0]-self.radius-obj.boardFramesDist[0]:
+                self.pos[0] -= 2*(obj.boardFramesDist[0] + self.pos[0]-self.screen_size[0]+self.radius)
                 self.vel = pygame.Vector2(self.x, self.y)
-                self.vel *= 0.999
+                self.vel *= 0.9
                 self.x = self.vel[0]
                 self.y = self.vel[1]
                 self.x *= -1
-            elif self.pos[0] < self.radius:
-                self.pos[0] += 2*(self.radius-self.pos[0])
+            elif self.pos[0] < self.radius + obj.boardFramesDist[0]:
+                self.pos[0] += 2*(obj.boardFramesDist[0] + self.radius-self.pos[0])
                 self.vel = pygame.Vector2(self.x, self.y)
-                self.vel *= 0.999
+                self.vel *= 0.9
                 self.x = self.vel[0]
                 self.y = self.vel[1]
                 self.x *= -1
 
-            if self.pos[1] > obj.screen_size[1]-self.radius:
-                self.pos[1] -= 2*(self.pos[1]-self.screen_size[1]+self.radius)
+            if self.pos[1] > obj.screen_size[1]-self.radius-obj.boardFramesDist[1]:
+                self.pos[1] -= 2*(self.pos[1]-self.screen_size[1]+self.radius+obj.boardFramesDist[1])
                 self.vel = pygame.Vector2(self.x, self.y)
-                self.vel *= 0.999
+                self.vel *= 0.9
                 self.x = self.vel[0]
                 self.y = self.vel[1]
                 self.y *= -1
-            elif self.pos[1] < self.radius:
-                self.pos[1] += 2*(self.radius-self.pos[1])
+            elif self.pos[1] < self.radius + obj.boardFramesDist[1]:
+                self.pos[1] += 2*(self.radius-self.pos[1] + obj.boardFramesDist[1])
                 self.vel = pygame.Vector2(self.x, self.y)
-                self.vel *= 0.999
+                self.vel *= 0.9
                 self.x = self.vel[0]
                 self.y = self.vel[1]
                 self.y *= -1
@@ -97,8 +98,8 @@ class obj:
                             i.y = i.vel[1]
 
 
-                            self.color = [abs(self.color[0]+ (0.5-random.random())*20)%256, abs(self.color[1]+ (0.5-random.random())*20)%256, abs(self.color[2]+ (0.5-random.random())*20)%256]
-                            i.color = [abs(i.color[0]+ (0.5-random.random())*20)%256, abs(i.color[1]+ (0.5-random.random())*20)%256, abs(i.color[2]+ (0.5-random.random())*20)%256]
+                            # self.color = [abs(self.color[0]+ (0.5-random.random())*20)%256, abs(self.color[1]+ (0.5-random.random())*20)%256, abs(self.color[2]+ (0.5-random.random())*20)%256]
+                            # i.color = [abs(i.color[0]+ (0.5-random.random())*20)%256, abs(i.color[1]+ (0.5-random.random())*20)%256, abs(i.color[2]+ (0.5-random.random())*20)%256]
 
                             self.update(dt *2)
                             i.update(dt *2)
@@ -171,7 +172,7 @@ if __name__ == '__main__':
         screen.fill((150,150,150))
         for i in balls:
             collisions.extend(i.collision([objs for objs in balls if objs.number != i.number], collisions, dt))
-            i.update(dt)
+            i.update(dt, screen)
             i.display()
         if obj.stoppedObjs == len(balls):
             obj.stoppedObjs = 0
